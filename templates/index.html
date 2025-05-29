@@ -1,0 +1,92 @@
+<<script>
+  function predict() {
+    const csvFileInput = document.getElementById("csvFileInput");
+    const textInput = document.getElementById("textInput");
+    const predictionResult = document.getElementById("predictionResult");
+    const graphContainer = document.getElementById("graphContainer");
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    // Clear previous results
+    predictionResult.innerHTML = "";
+    graphContainer.innerHTML = "";
+    downloadBtn.style.display = "none";
+
+    if (csvFileInput.files.length > 0) {
+      const formData = new FormData();
+      formData.append("file", csvFileInput.files[0]);
+
+      fetch("http://localhost:5000/predict", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Server returned an error while processing CSV.");
+        }
+
+        // Handle graph if sent
+        const graphData = response.headers.get('X-Graph-Data');
+        const graphExists = response.headers.get('X-Graph-Exists') === 'true';
+
+        if (graphExists && graphData) {
+          displayGraph(graphData);
+        }
+
+        return response.blob();
+      })
+      .then(blob => {
+        const blobUrl = URL.createObjectURL(blob);
+        downloadBtn.style.display = "inline-block";
+        downloadBtn.onclick = function () {
+          const a = document.createElement("a");
+          a.href = blobUrl;
+          a.download = "Predictions.csv";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        };
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        predictionResult.innerHTML = "<span class='text-red-600'>Error uploading CSV.</span>";
+      });
+
+    } else if (textInput.value.trim() !== "") {
+      fetch("http://localhost:5000/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text: textInput.value.trim() })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Error with prediction request.");
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.prediction) {
+          predictionResult.innerHTML = "Predicted sentiment: <b>" + data.prediction + "</b>";
+        } else {
+          predictionResult.innerHTML = "<span class='text-yellow-600'>No prediction returned.</span>";
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        predictionResult.innerHTML = "<span class='text-red-600'>Error making prediction.</span>";
+      });
+
+    } else {
+      predictionResult.innerHTML = "<span class='text-red-600'>Please upload a CSV file or enter text.</span>";
+    }
+  }
+
+  function displayGraph(graphData) {
+    const img = document.createElement("img");
+    img.src = "data:image/png;base64," + graphData;
+    img.alt = "Prediction Graph";
+    img.classList.add("mx-auto", "mt-4", "max-w-full", "rounded");
+    document.getElementById("graphContainer").appendChild(img);
+  }
+</script>
