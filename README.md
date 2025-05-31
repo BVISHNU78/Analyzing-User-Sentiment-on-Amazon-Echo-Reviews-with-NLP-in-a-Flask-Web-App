@@ -3,6 +3,7 @@ This project focuses on analyzing customer reviews of the Amazon Echo using Natu
 
 ![Screenshot 2025-05-24 225102](https://github.com/user-attachments/assets/93c34582-b547-4301-ace7-aba0c071f5fd)
 
+
 # Create virtual environment
 python -m venv venv
 
