@@ -24,6 +24,7 @@ http://127.0.0.1:5000
 A Flask web application that analyzes user sentiment on Amazon Echo product reviews using Natural Language Processing (NLP).
 This project collects Amazon Echo user reviews and uses NLP techniques to analyze the sentiment (positive, negative, neutral) expressed in the reviews. The results are displayed in a simple and interactive Flask web app where users can input reviews and get instant sentiment feedback.
 
+
 ## Features
 
 - Sentiment classification (Positive, Negative, Neutral) on user reviews  
